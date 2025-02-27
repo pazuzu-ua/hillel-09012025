@@ -1,2 +1,4 @@
 # hillel-09012025
-Hillel educational repository
+Hillel educational repository.
+
+Welcome!
