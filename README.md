@@ -5,7 +5,7 @@ Welcome!
 
 1. Be sure that you are on "main"
 
-```git switch main```
+```cdg```
 
 2. Update your "main"
 
