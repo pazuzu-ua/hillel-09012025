@@ -17,3 +17,4 @@ dog = Dog("Шерлок", 3, "Джек Рассел")
 dog.speak()
 dog.bark()
 
+g
