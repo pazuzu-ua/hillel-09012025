@@ -1,125 +1,63 @@
-# наслідування
-# абстракцію
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
 
-# інкапсуляція
-# int numbers[] = { 1, 2, 3 }
-# numbers[15]
+# pip install fastapi
+# pip install uvicorn
+# uvicorn main:app --reload
+app = FastAPI(
+    debug=True,         # помилки стануть більш детальними
+    title='Book API',
+    description='A simple book API',
+    version='0.0.3',
+)
 
-# class Account:
-#     def __init__(self, amount):
-#         # публічний атрибут
-#         self.amount = amount
+# обробник шляху
+# BOOK - entity - сутність
+# /books      - GET - отримати УСЮ колекцію
+# /books      - POST - створити 1 елемент
+# параметри шляху: {name}
+# /books/{id}  - GET  - отримати інфу по 1 книжці
+# /books/{id}  - PATCH - оновити інфу по 1 книжці
+# /books/{id}  - DELETE - видалити 1 з книжок
 
-# a.amount
-# a.amount = 200
+# @app.get('/')                       # root = корінь сайту
+# async def index():                  # ключове слово async робить ф-ію асинхронною
+#     return "Hello"
+#
+# @app.get('/book')                       # root = корінь сайту
+# async def get_book():                  # ключове слово async робить ф-ію асинхронною
+#     return "Hello"
 
-# class Account:
-#     def __init__(self, amount):
-#         # приватними (private) атрибут
-#         self._amount = amount
-#
-#     # getter
-#     def get_amount(self):
-#         # тут буде валідація
-#         return self._amount
-#
-#     # setter
-#     def set_amount(self, value):
-#         # тут буде валідація
-#         self._amount = value
-#
-#
-# a = Account(0)
-# a.set_amount(1000)
-# a._amount = 400
-# print( a.get_amount() )
+class BookInfo(BaseModel):      # базова модель книги
+    # id: int                     # поле id, типу int
+    # перший параметр - це значення за замовчуванням
+    # ... - це без значення за замовчуванням - параметр є обов'язковим
+    id: int = Field(..., description='The unique ID of the book', gt=0)
+    name: str = Field(..., description='The name of the book', min_length=1, max_length=50)
 
-# class Account:
-#     def __init__(self, amount, name):
-#         # protected (захищені) атрибути
-#         self.__amount = amount           #  _Account__amount
-#         self.name = name
-#
-#     # getter
-#     @property
-#     def amount(self):
-#         # validation
-#         return self.__amount
-#
-#     # setter
-#     @amount.setter
-#     def amount(self, value):
-#         # validation
-#         if value > 9999:
-#             raise ValueError('Too much money')
-#         self.__amount = value
-#
-# a = Account(200, 'MyMoney')
-# a.amount = 5020
-# print(a.amount)
+@app.get(
+    '/books',
+    summary='Get a list of books',
+    description='Retrieve a list of all the books',
+    response_model=list[dict],
+)
+async def get_books():
+    return [
+        { "id": 1, "name": "HarryPotter" },
+        { "id": 2, "name": "IT" },
+        { "id": 3, "name": "HarryPotter2" },
+    ]
 
-# -------------------------- поліморфізм
-# class Account:
-#     def __init__(self, amount):
-#         self.amount = amount
-#
-#     # for print() and str()
-#     def __str__(self):
-#         return f"Account with {self.amount} money"
-#
-#     # for +
-#     #            a1    a2
-#     def __add__(self, other):
-#         #                       a2
-#         if isinstance( other, Account ):
-#             #         a1.amount + a2.amount
-#             #         5000      + 4000
-#             return self.amount + other.amount
-#         elif isinstance( other, int ) or isinstance( other, float ):
-#             #       a1.amount  + 22
-#             #          5000    + 22
-#             return self.amount + other
-#
-#     # for -
-#     def __sub__(self, other):
-#         return self.amount - other.amount
-#
-#     # for >
-#     def __gt__(self, other):
-#         return self.amount > other.amount
-#
-# a1 = Account(5000)
-# a2 = Account(4000)
-#
-# a1 + a2             # ===>     a1.__add__(a2)
-#
-# print( a1 + a2 ) # ===>     a1.__add__(a2)
-# print( a1 + 22 ) # ===>     a1.__add__(22)
-
-# ---------------------- dataclasses
-class PersonA:
-    def __init__(self, name, surname, age):
-        self.name = name
-        self.surname = surname
-        self.age = age
-
-    def info(self):
-        return f'Name: {self.name} {self.surname}\nAge: {self.age}'
-
-from dataclasses import dataclass
-
-@dataclass
-class Person:
-    name: str
-    surname: str
-    age: int
-
-    def info(self):
-        return f'Name: {self.name} {self.surname}\nAge: {self.age}'
-
-
-pa = PersonA('John', 'Doe', 40)
-p1 = Person('John', 'Doe', 40)
-p2 = Person('John', 'Doe', 40)
-print( pa )
-print( p1 == p2 )
+#  /customers/{customer_id}/products/{product_id}
+# /customers/104/products/56
+@app.get(
+    '/books/{book_id}',
+    summary='Get book info',
+    description='Get info on a single book.',
+    response_model=BookInfo
+)
+async def get_book(book_id: int):
+    return BookInfo(
+        id=book_id,
+        name="*" * 51
+    )
