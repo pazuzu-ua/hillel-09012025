@@ -1,0 +1,11 @@
+class MagicNumber:
+    def __init__(self,value):
+        self.__value=value
+
+    def __add__(self,other):
+        if isinstance(other,MagicNumber):
+            return MagicNumber(self.__value+other.__value)
+        return NotImplemented
+
+    def get_value(self):
+        return self.__value
