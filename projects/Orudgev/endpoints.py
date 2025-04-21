@@ -20,7 +20,7 @@ def create_parrot(parrot: ParrotCreate):
     if not parrot_id:
         raise HTTPException(status_code=404, detail='Parrot not created')
     parrot_info = ParrotInfo(
-        i_parrot=parrot.id,
+        i_parrot=parrot_id,
         name=parrot.name,
         color=parrot.color,
         age=parrot.age
