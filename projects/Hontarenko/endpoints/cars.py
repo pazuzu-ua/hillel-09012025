@@ -1,6 +1,6 @@
-from schemas.cars import CarsInfo, CarCreate
-from fastapi import APIRouter, HTTPException
-from db.cars import create_car, get_list_of_cars,get_car_info
+from schemas.cars import CarsInfo, CarCreate, CarUpdate
+from fastapi import APIRouter, HTTPException, Response
+from db.cars import create_car, get_list_of_cars, get_car_info, remove_car, update_car_info
 
 router = APIRouter(prefix='/cars', tags=['cars'])
 
@@ -8,17 +8,17 @@ router = APIRouter(prefix='/cars', tags=['cars'])
 @router.get('/', response_model=list[CarsInfo])
 def get_car_list():
     cars_list = get_list_of_cars()
-    cars_list=[CarsInfo(i_car=car[0], brand=car[1], model=car[2], colour=car[3], production_date=car[4]) for car in cars_list]
+    cars_list = [CarsInfo(i_car=car[0], brand=car[1], model=car[2], colour=car[3], production_date=car[4]) for car in
+                 cars_list]
 
     return cars_list
 
 
 @router.get('/{car_id}', response_model=CarsInfo)
 def get_car_info(car_id: int):
-    car_info=get_car_info(car_id)
-    if not car_info:
-        raise HTTPException(status_code=404, detail=' Car not found ')
-    car_info=CarsInfo(i_car=car_info[0], brand=car_info[1], model=car_info[2], colour=car_info[3], production_date=car_info[4])
+    car_info = _get_car_info(car_id)
+    car_info = CarsInfo(i_car=car_info[0], brand=car_info[1], model=car_info[2], colour=car_info[3],
+                        production_date=car_info[4])
     return car_info
 
 
@@ -33,4 +33,32 @@ def create_car(car: CarCreate):
         model=car.model,
         production_date=car.production_date
     )
+    return car_info
+
+
+@router.delete('/{car_id}', status_code=204)
+def delete_car(car_id: int):
+    car_info = _get_car_info(car_id)
+    remove_car(car_id)
+    return Response(status_code=204)
+
+
+@router.put('/{car_id}', response_model=CarsInfo)
+def update_car(car: CarCreate, car_id: int):
+    car_info = _get_car_info(car_id)
+    update_car_info(car_id, car)
+    car_info = _get_car_info(car_id)
+    car_info = CarsInfo(
+        i_car=car_id,
+        brand=car.brand,
+        model=car.model,
+        production_date=car.production_date
+    )
+    return car_info
+
+
+def _get_car_info(car_id: int) -> dict:
+    car_info = get_car_info(car_id)
+    if not car_info:
+        raise HTTPException(status_code=404, detail=' Car not found ')
     return car_info

@@ -1,4 +1,5 @@
 import sqlite3
+from schemas.cars import CarUpdate
 
 
 def init_db():
@@ -41,3 +42,18 @@ def get_car_info(car_id: int):
         cursor.execute('SELECT * FROM Cars WHERE i_car=?', (car_id,))
         car_info = cursor.fetchone()
         return car_info
+
+
+def remove_car(car_id: int):
+    with sqlite3.connect('base.db') as connection:
+        cursor = connection.cursor()
+        cursor.execute('DELETE FROM Cars WHERE i_car=?', (car_id,))
+        return True
+
+
+def update_car_info(car_id: int, car_info: CarUpdate):
+    with sqlite3.connect('base.db') as connection:
+        cursor = connection.cursor()
+        cursor.execute('UPDATE Cars SET brand=?,model=?,colour=?,production_date=? WHERE i_car=?',
+                       (car_info.brand,car_info.model,car_info.colour,car_info.production_date)
+                       )
