@@ -82,3 +82,48 @@ def get_cars():
             "SELECT id, brand, model, year FROM cars"
         ).fetchall()
     return [dict(car) for car in cars]
+
+
+@app.put("/cars/{car_id}", response_model=CarResponse)
+def update_car(car_id: int, updated_car: CarCreate):
+    with get_connection() as conn:
+        car_exists = conn.execute(
+            "SELECT id FROM cars WHERE id = ?",
+            (car_id,),
+        ).fetchone()
+        if car_exists is None:
+            raise HTTPException(status_code=404, detail="Car not found")
+
+        conn.execute(
+            """
+            UPDATE cars
+            SET brand = ?, model = ?, year = ?
+            WHERE id = ?
+            """,
+            (updated_car.brand, updated_car.model, updated_car.year, car_id),
+        )
+        conn.commit()
+
+        updated_car_data = conn.execute(
+            "SELECT id, brand, model, year FROM cars WHERE id = ?",
+            (car_id,),
+        ).fetchone()
+    return dict(updated_car_data)
+
+
+@app.delete("/cars/{car_id}")
+def delete_car(car_id: int):
+    with get_connection() as conn:
+        car_exists = conn.execute(
+            "SELECT id FROM cars WHERE id = ?",
+            (car_id,),
+        ).fetchone()
+        if car_exists is None:
+            raise HTTPException(status_code=404, detail="Car not found")
+
+        conn.execute(
+            "DELETE FROM cars WHERE id = ?",
+            (car_id,),
+        )
+        conn.commit()
+    return {"detail": "Car deleted successfully"}
