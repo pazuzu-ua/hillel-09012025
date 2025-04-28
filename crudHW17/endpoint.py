@@ -47,4 +47,3 @@ def get_books_info(book_id: int):
                      )
     return book
 
-
