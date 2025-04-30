@@ -1,8 +1,6 @@
 from fastapi import APIRouter
 
 from models.authors import AuthorAdd, AuthorInfo, AuthorUpdate
-from db.authors import add_author
-
 
 router = APIRouter(prefix='/authors', tags=['authors'])
 
